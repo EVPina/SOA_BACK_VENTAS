@@ -12,12 +12,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "productos")
+@Table(name = "productos", schema = "public")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Producto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "uuid")
@@ -37,6 +38,10 @@ public class Producto {
 
     @Builder.Default
     private Boolean disponible = true;
+
+    @Column(length = 20)
+    @Builder.Default
+    private String estado = "ACTIVO";
 
     @Column(name = "imagen_url", length = 255)
     private String imagenUrl;
