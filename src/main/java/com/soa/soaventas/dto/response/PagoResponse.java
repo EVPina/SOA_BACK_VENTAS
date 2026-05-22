@@ -8,16 +8,13 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class ProductoResponse {
-
+public class PagoResponse {
     private UUID id;
-    private String nombre;
-    private String descripcion;
-    private BigDecimal precio;
-    private String categoria;
-    private Boolean disponible;
+    private UUID pedidoId;
+    private String metodoPago;
+    private BigDecimal monto;
+    private String referencia;
     private String estado;
-    private String imagenUrl;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private ComprobanteResponse comprobante;
 }
