@@ -166,4 +166,12 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setEstado("CANCELADO");
         pedidoRepository.save(pedido);
     }
+
+        @Override   // Agregar en PedidoService.java
+        public BigDecimal obtenerTotalAcumuladoPorCliente(UUID clienteId) {
+        return pedidoRepository.findByClienteIdAndEstadoNot(clienteId, "CANCELADO")
+                .stream()
+                .map(Pedido::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
 }

@@ -13,6 +13,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -82,5 +84,12 @@ public class PedidoController {
     public ResponseEntity<ApiResponse<Void>> cancelar(@PathVariable UUID id) {
         pedidoService.cancelarPedido(id);
         return ResponseEntity.ok(ApiResponse.success("Pedido cancelado exitosamente", null));
+    }
+
+    // Agregar en PedidoController.java
+    @GetMapping("/total/cliente/{clienteId}")
+    public ResponseEntity<ApiResponse<BigDecimal>> obtenerTotalAcumulado(@PathVariable UUID clienteId) {
+        BigDecimal total = pedidoService.obtenerTotalAcumuladoPorCliente(clienteId);
+        return ResponseEntity.ok(ApiResponse.success(total));
     }
 }

@@ -28,4 +28,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, UUID> {
     List<Pedido> findPedidosActivosByMesa(@Param("sesionMesaId") UUID sesionMesaId);
     
     long countByEstadoAndCreatedAtBetween(String estado, LocalDateTime inicio, LocalDateTime fin);
+        // Agregar en PedidoRepository.java
+    List<Pedido> findByClienteIdAndEstadoNot(UUID clienteId, String estado);
 }

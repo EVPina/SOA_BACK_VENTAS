@@ -3,6 +3,8 @@ package com.soa.soaventas.service;
 import com.soa.soaventas.dto.request.PedidoRequest;
 import com.soa.soaventas.dto.response.PedidoResponse;
 import com.soa.soaventas.dto.response.ReporteVentasResponse;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -16,4 +18,5 @@ public interface PedidoService {
     List<PedidoResponse> listarPedidosActivosPorMesa(UUID sesionMesaId);
     ReporteVentasResponse obtenerResumenVentasPorFecha(LocalDate fecha);
     void cancelarPedido(UUID id);
+    public BigDecimal obtenerTotalAcumuladoPorCliente(UUID clienteId);
 }
