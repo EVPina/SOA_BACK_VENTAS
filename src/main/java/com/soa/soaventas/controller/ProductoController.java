@@ -5,7 +5,6 @@ import com.soa.soaventas.dto.response.ApiResponse;
 import com.soa.soaventas.dto.response.ProductoResponse;
 import com.soa.soaventas.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +22,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/productos")
 @RequiredArgsConstructor
-@Tag(name = "Productos", description = "API para gestión de productos")
+@Tag(name = "Productos", description = "API para gesti�n de productos")
 public class ProductoController {
 
     private final ProductoService productoService;
-
-    // ========== CRUD BÁSICO ==========
 
     @PostMapping
     @Operation(summary = "Crear un nuevo producto")
@@ -48,7 +45,7 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar un producto (soft delete)")
+    @Operation(summary = "Eliminar un producto (soft delete, lo marca como no disponible)")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable UUID id) {
         productoService.eliminarProducto(id);
         return ResponseEntity.ok(ApiResponse.success("Producto eliminado exitosamente", null));
@@ -61,26 +58,17 @@ public class ProductoController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // ========== LISTADOS ==========
-
     @GetMapping("/activos")
-    @Operation(summary = "Listar productos activos (menú principal)")
+    @Operation(summary = "Listar productos disponibles (alias para compatibilidad con men�)")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> listarActivos() {
-        List<ProductoResponse> response = productoService.listarProductosActivos();
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @GetMapping("/disponibles")
-    @Operation(summary = "Listar productos disponibles (independiente del estado)")
-    public ResponseEntity<ApiResponse<List<ProductoResponse>>> listarDisponibles() {
         List<ProductoResponse> response = productoService.listarProductosDisponibles();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/estado/{estado}")
-    @Operation(summary = "Listar productos por estado (ACTIVO, INACTIVO, AGOTADO, ELIMINADO)")
-    public ResponseEntity<ApiResponse<List<ProductoResponse>>> listarPorEstado(@PathVariable String estado) {
-        List<ProductoResponse> response = productoService.listarProductosPorEstado(estado.toUpperCase());
+    @GetMapping("/disponibles")
+    @Operation(summary = "Listar productos disponibles")
+    public ResponseEntity<ApiResponse<List<ProductoResponse>>> listarDisponibles() {
+        List<ProductoResponse> response = productoService.listarProductosDisponibles();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -92,8 +80,6 @@ public class ProductoController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // ========== BÚSQUEDAS ==========
-
     @GetMapping("/buscar")
     @Operation(summary = "Buscar productos por nombre")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> buscarPorNombre(
@@ -103,35 +89,19 @@ public class ProductoController {
     }
 
     @GetMapping("/categoria/{categoria}")
-    @Operation(summary = "Buscar productos activos por categoría")
+    @Operation(summary = "Buscar productos por categor�a")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> buscarPorCategoria(@PathVariable String categoria) {
         List<ProductoResponse> response = productoService.buscarPorCategoria(categoria);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/precio")
-    @Operation(summary = "Buscar productos activos por rango de precio")
+    @Operation(summary = "Buscar productos disponibles por rango de precio")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> buscarPorRangoPrecio(
             @RequestParam BigDecimal min,
             @RequestParam BigDecimal max) {
-        List<ProductoResponse> response = productoService.buscarActivosPorRangoPrecio(min, max);
+        List<ProductoResponse> response = productoService.buscarDisponiblesPorRangoPrecio(min, max);
         return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    // ========== ACCIONES ESPECÍFICAS ==========
-
-    @PatchMapping("/{id}/activar")
-    @Operation(summary = "Activar un producto")
-    public ResponseEntity<ApiResponse<Void>> activar(@PathVariable UUID id) {
-        productoService.activarProducto(id);
-        return ResponseEntity.ok(ApiResponse.success("Producto activado exitosamente", null));
-    }
-
-    @PatchMapping("/{id}/desactivar")
-    @Operation(summary = "Desactivar un producto")
-    public ResponseEntity<ApiResponse<Void>> desactivar(@PathVariable UUID id) {
-        productoService.desactivarProducto(id);
-        return ResponseEntity.ok(ApiResponse.success("Producto desactivado exitosamente", null));
     }
 
     @PatchMapping("/{id}/disponibilidad")
@@ -143,10 +113,10 @@ public class ProductoController {
         return ResponseEntity.ok(ApiResponse.success("Disponibilidad actualizada exitosamente", null));
     }
 
-    @GetMapping("/contar/{estado}")
-    @Operation(summary = "Contar productos por estado")
-    public ResponseEntity<ApiResponse<Long>> contarPorEstado(@PathVariable String estado) {
-        long cantidad = productoService.contarPorEstado(estado.toUpperCase());
+    @GetMapping("/contar/disponibles")
+    @Operation(summary = "Contar productos disponibles")
+    public ResponseEntity<ApiResponse<Long>> contarDisponibles() {
+        long cantidad = productoService.contarDisponibles();
         return ResponseEntity.ok(ApiResponse.success(cantidad));
     }
 }

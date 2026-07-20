@@ -25,6 +25,8 @@ public interface PedidoMapper {
     
     PedidoResponse toResponse(Pedido pedido);
     
+    @Mapping(source = "producto.id", target = "productoId")
+    @Mapping(source = "producto.nombre", target = "productoNombre")
     DetallePedidoResponse toDetalleResponse(DetallePedido detalle);
     
     void updateEntity(@MappingTarget Pedido pedido, PedidoRequest request);

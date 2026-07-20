@@ -23,6 +23,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,24 @@ public class PedidoServiceImpl implements PedidoService {
     private final ProductoRepository productoRepository;
     private final DetallePedidoRepository detallePedidoRepository;
     private final PedidoMapper pedidoMapper;
+    private final org.springframework.web.client.RestTemplate restTemplate;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @org.springframework.beans.factory.annotation.Value("${service.mesas.url:http://localhost:8083/api/v1}")
+    private String mesasServiceUrl;
+
+    @PostConstruct
+    @Transactional
+    public void dropConstraint() {
+        try {
+            entityManager.createNativeQuery("ALTER TABLE public.pedidos DROP CONSTRAINT IF EXISTS chk_estado_pedido").executeUpdate();
+            log.info("Constraint chk_estado_pedido eliminado correctamente");
+        } catch (Exception e) {
+            log.error("Error al eliminar constraint: ", e);
+        }
+    }
 
     @Override
     public PedidoResponse crearPedido(PedidoRequest request) {
@@ -66,13 +87,30 @@ public class PedidoServiceImpl implements PedidoService {
             detallePedidoRepository.save(detalle);
         }
         
-        // Actualizar totales
+        // Actualizar totales del Pedido
         BigDecimal igv = subtotal.multiply(new BigDecimal("0.18"));
         savedPedido.setSubtotal(subtotal);
         savedPedido.setIgv(igv);
         savedPedido.setTotal(subtotal.add(igv));
         
-        return pedidoMapper.toResponse(pedidoRepository.save(savedPedido));
+        Pedido finalPedido = pedidoRepository.save(savedPedido);
+
+        // Sumar al total de la sesion de la mesa a través del microservicio sb-mesas
+        if (request.getSesionMesaId() != null) {
+            try {
+                String url = mesasServiceUrl + "/sesiones-mesa/" + request.getSesionMesaId() + "/consumo?monto=" + finalPedido.getTotal();
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+                org.springframework.http.HttpEntity<String> requestEntity = new org.springframework.http.HttpEntity<>(null, headers);
+                
+                restTemplate.exchange(url, org.springframework.http.HttpMethod.PUT, requestEntity, Void.class);
+                log.info("Consumo actualizado en sb-mesas para la sesión {}", request.getSesionMesaId());
+            } catch (Exception e) {
+                log.error("Error al actualizar consumo en sb-mesas", e);
+            }
+        }
+        
+        return pedidoMapper.toResponse(finalPedido);
     }
 
     @Override

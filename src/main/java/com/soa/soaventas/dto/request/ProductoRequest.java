@@ -25,7 +25,6 @@ public class ProductoRequest {
 
     private Boolean disponible = true;
 
-    private String estado = "ACTIVO";
 
     private String imagenUrl;
 }

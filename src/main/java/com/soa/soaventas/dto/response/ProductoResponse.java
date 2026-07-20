@@ -16,7 +16,6 @@ public class ProductoResponse {
     private BigDecimal precio;
     private String categoria;
     private Boolean disponible;
-    private String estado;
     private String imagenUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

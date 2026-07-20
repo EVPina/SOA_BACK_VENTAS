@@ -39,9 +39,6 @@ public class Producto {
     @Builder.Default
     private Boolean disponible = true;
 
-    @Column(length = 20)
-    @Builder.Default
-    private String estado = "ACTIVO";
 
     @Column(name = "imagen_url", length = 255)
     private String imagenUrl;

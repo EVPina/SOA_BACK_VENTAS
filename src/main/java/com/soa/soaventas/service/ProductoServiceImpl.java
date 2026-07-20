@@ -1,4 +1,4 @@
-package com.soa.soaventas.service;
+﻿package com.soa.soaventas.service;
 
 import com.soa.soaventas.dto.request.ProductoRequest;
 import com.soa.soaventas.dto.response.ProductoResponse;
@@ -31,17 +31,12 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponse crearProducto(ProductoRequest request) {
         log.info("Creando nuevo producto: {}", request.getNombre());
 
-        // Validar que no exista un producto con el mismo nombre
         if (productoRepository.existsByNombreIgnoreCase(request.getNombre())) {
             throw new BusinessException("Ya existe un producto con el nombre: " + request.getNombre());
         }
 
         Producto producto = productoMapper.toEntity(request);
         
-        // Asegurar valores por defecto
-        if (producto.getEstado() == null) {
-            producto.setEstado("ACTIVO");
-        }
         if (producto.getDisponible() == null) {
             producto.setDisponible(true);
         }
@@ -59,7 +54,6 @@ public class ProductoServiceImpl implements ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
 
-        // Validar nombre único (excepto el mismo producto)
         if (!producto.getNombre().equalsIgnoreCase(request.getNombre()) &&
                 productoRepository.existsByNombreIgnoreCase(request.getNombre())) {
             throw new BusinessException("Ya existe otro producto con el nombre: " + request.getNombre());
@@ -79,12 +73,10 @@ public class ProductoServiceImpl implements ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
 
-        // Soft delete: cambiar estado a ELIMINADO
-        producto.setEstado("ELIMINADO");
         producto.setDisponible(false);
         productoRepository.save(producto);
         
-        log.info("Producto marcado como ELIMINADO: {}", id);
+        log.info("Producto marcado como no disponible: {}", id);
     }
 
     @Override
@@ -95,26 +87,6 @@ public class ProductoServiceImpl implements ProductoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
 
         return productoMapper.toResponse(producto);
-    }
-
-    @Override
-    public List<ProductoResponse> listarProductosActivos() {
-        log.debug("Listando productos activos");
-        
-        return productoRepository.findByEstado("ACTIVO")
-                .stream()
-                .map(productoMapper::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ProductoResponse> listarProductosPorEstado(String estado) {
-        log.debug("Listando productos por estado: {}", estado);
-        
-        return productoRepository.findByEstado(estado)
-                .stream()
-                .map(productoMapper::toResponse)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -149,48 +121,20 @@ public class ProductoServiceImpl implements ProductoService {
     public List<ProductoResponse> buscarPorCategoria(String categoria) {
         log.debug("Buscando productos por categoría: {}", categoria);
         
-        return productoRepository.findByCategoriaAndEstado(categoria, "ACTIVO")
+        return productoRepository.findByCategoria(categoria)
                 .stream()
                 .map(productoMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductoResponse> buscarActivosPorRangoPrecio(BigDecimal min, BigDecimal max) {
+    public List<ProductoResponse> buscarDisponiblesPorRangoPrecio(BigDecimal min, BigDecimal max) {
         log.debug("Buscando productos por rango de precio: {} - {}", min, max);
         
-        return productoRepository.findActivosByPrecioRange(min, max)
+        return productoRepository.findDisponiblesByPrecioRange(min, max)
                 .stream()
                 .map(productoMapper::toResponse)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public void activarProducto(UUID id) {
-        log.info("Activando producto: {}", id);
-        
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
-        
-        producto.setEstado("ACTIVO");
-        producto.setDisponible(true);
-        productoRepository.save(producto);
-        
-        log.info("Producto activado: {}", id);
-    }
-
-    @Override
-    public void desactivarProducto(UUID id) {
-        log.info("Desactivando producto: {}", id);
-        
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
-        
-        producto.setEstado("INACTIVO");
-        producto.setDisponible(false);
-        productoRepository.save(producto);
-        
-        log.info("Producto desactivado: {}", id);
     }
 
     @Override
@@ -201,22 +145,12 @@ public class ProductoServiceImpl implements ProductoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
         
         producto.setDisponible(disponible);
-        
-        // Si no está disponible y está activo, cambiar a INACTIVO
-        if (!disponible && "ACTIVO".equals(producto.getEstado())) {
-            producto.setEstado("INACTIVO");
-        }
-        // Si está disponible y está INACTIVO, cambiar a ACTIVO
-        if (disponible && "INACTIVO".equals(producto.getEstado())) {
-            producto.setEstado("ACTIVO");
-        }
-        
         productoRepository.save(producto);
     }
 
     @Override
-    public long contarPorEstado(String estado) {
-        log.debug("Contando productos por estado: {}", estado);
-        return productoRepository.countByEstado(estado);
+    public long contarDisponibles() {
+        log.debug("Contando productos disponibles");
+        return productoRepository.countByDisponibleTrue();
     }
 }

@@ -1,5 +1,5 @@
 package com.soa.soaventas.enums;
 
 public enum EstadoPedido {
-    PENDIENTE, EN_COCINA, SERVIDO, PAGADO, CANCELADO
+    PENDIENTE, PREPARANDO, LISTO, ENTREGADO, SERVIDO, PAGADO, CANCELADO, EN_COCINA
 }
