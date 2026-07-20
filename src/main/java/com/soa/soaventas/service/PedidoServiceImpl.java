@@ -163,16 +163,17 @@ public class PedidoServiceImpl implements PedidoService {
         List<Pedido> pedidos = pedidoRepository.findPedidosByFechaRange(inicio, fin);
         
         BigDecimal ventasTotales = pedidos.stream()
+                .filter(p -> "PAGADO".equals(p.getEstado()))
                 .map(Pedido::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         BigDecimal ventasQR = pedidos.stream()
-                .filter(p -> "QR".equals(p.getOrigen()))
+                .filter(p -> "QR".equals(p.getOrigen()) && "PAGADO".equals(p.getEstado()))
                 .map(Pedido::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         BigDecimal ventasMozo = pedidos.stream()
-                .filter(p -> "MOZO".equals(p.getOrigen()))
+                .filter(p -> "MOZO".equals(p.getOrigen()) && "PAGADO".equals(p.getEstado()))
                 .map(Pedido::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
