@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/productos")
 @RequiredArgsConstructor
-@Tag(name = "Productos", description = "API para gestión de productos")
+@Tag(name = "Productos", description = "API para gestiÃ³n de productos")
 public class ProductoController {
 
     private final ProductoService productoService;
@@ -59,7 +59,7 @@ public class ProductoController {
     }
 
     @GetMapping("/activos")
-    @Operation(summary = "Listar productos disponibles (alias para compatibilidad con menú)")
+    @Operation(summary = "Listar productos disponibles (alias para compatibilidad con menÃº)")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> listarActivos() {
         List<ProductoResponse> response = productoService.listarProductosDisponibles();
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -89,7 +89,7 @@ public class ProductoController {
     }
 
     @GetMapping("/categoria/{categoria}")
-    @Operation(summary = "Buscar productos por categoría")
+    @Operation(summary = "Buscar productos por categorÃ­a")
     public ResponseEntity<ApiResponse<List<ProductoResponse>>> buscarPorCategoria(@PathVariable String categoria) {
         List<ProductoResponse> response = productoService.buscarPorCategoria(categoria);
         return ResponseEntity.ok(ApiResponse.success(response));

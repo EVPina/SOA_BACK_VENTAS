@@ -1,4 +1,4 @@
-﻿package com.soa.soaventas.service;
+package com.soa.soaventas.service;
 
 import com.soa.soaventas.dto.request.ProductoRequest;
 import com.soa.soaventas.dto.response.ProductoResponse;
